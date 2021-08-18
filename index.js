@@ -49,7 +49,7 @@ const  useFormValidator = (props) => {
   const onHandleChange = (event) => {
     event.preventDefault();
     const { name, placeholder, value, type } = event.target;
-    let errors = props.errors;
+    let errors = fields.errors;
     if (type === "select-multiple") {
       let optionValue = Array.from(
         event.target.selectedOptions,
@@ -62,7 +62,7 @@ const  useFormValidator = (props) => {
   const onHandleBlur = (event) => {
     event.preventDefault();
     const { name, placeholder, value, type } = event.target;
-    let errors = props.errors;
+    let errors = fields.errors;
     validate(name, placeholder, value, type, errors);
   };
 
@@ -70,17 +70,8 @@ const  useFormValidator = (props) => {
     switch (type) {
       case "text":
       case "password":
-        errors[name] =
-          value.length == 0 && props.errors.hasOwnProperty(name)
-            ? `The ${placeholder ?? name} field is required`
-            : "";
-        break;
+      case "checkbox":
       case "select-one":
-        errors[name] =
-          value == 0 && props.errors.hasOwnProperty(name)
-            ? `The ${placeholder ?? name} field is required`
-            : "";
-        break;
       case "select-multiple":
         errors[name] =
           value.length == 0 && props.errors.hasOwnProperty(name)
@@ -88,19 +79,22 @@ const  useFormValidator = (props) => {
             : "";
         break;
       case "email":
-        errors.email =
-          !emailPattern.test(value) && props.errors.hasOwnProperty(name)
-            ? "The Email is invalid!"
-            : "";
+        errors[name] =
+          value.length == 0 && props.errors.hasOwnProperty(name)
+            ? `The ${placeholder ?? name} field is required`
+            : (!emailPattern.test(value) && props.errors.hasOwnProperty(name)
+              ? "The Email is invalid!"
+              : ""
+            );
         break;
       default:
         break;
     }
 
     setFields({
-      ...fields,
-      errors,
+      ...fields,      
       [name]: value,
+      errors
     });
   };
 

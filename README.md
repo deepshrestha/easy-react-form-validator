@@ -23,6 +23,7 @@ npm i easy-react-form-validator -D or --save-dev
 import {useFormValidator, errorMessage} from 'easy-react-form-validator';
 
 const initialState = {
+    mode: <optional>, 	// String value ( 'I' => insert or 'U' => update )
     fullName: '',
     address: '',
     email: '',
@@ -33,6 +34,8 @@ const initialState = {
         password: ''
     }
 };
+
+The property "mode" is an optional. However, it can be used while validating forms with insert and update methods.
 
 const {
     onHandleChange,
@@ -51,7 +54,7 @@ For Example:
 
 1. Create input type element
 2. Do not forget to add input properties such as name and placeholder
-3. Add the handler functions to validate the form such as onHandleSubmit,   onHandleChange, onHandleBlur
+3. Add the handler functions to validate the form such as onHandleSubmit, onHandleChange, onHandleBlur
 4. To display the error, add a div underneath each input type element.
 
 For Example:
