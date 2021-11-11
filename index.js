@@ -19,12 +19,13 @@ const  useFormValidator = (props) => {
     event.preventDefault();
     let errors = fields.errors;
     Object.keys(errors).map((error) => {
+      
       if(event.target[error] !== undefined && fields[error] !== null)
         validate(
           error,
-          event.target[error].placeholder,
+          (event.target[error].placeholder === undefined) ? (event.target[error][0].placeholder == undefined ? event.target[error].options[0].innerHTML : event.target[error][0].placeholder) : event.target[error].placeholder,
           fields[error],
-          event.target[error].type,
+          (event.target[error].type === undefined) ? event.target[error][0].type : event.target[error].type,
           fields.errors
         );
     });
@@ -36,9 +37,12 @@ const  useFormValidator = (props) => {
       let errors = fields.errors;
       Object.keys(errors).every(function (key) {
         if (errors[key].length > 0) {
-          event.target[key].focus();
+          if(key === "radio")
+            event.target[key][0].focus();
+          else
+            event.target[key].focus();
           return false;
-        } else {
+        }else {
           return true;
         }
       });
@@ -46,8 +50,7 @@ const  useFormValidator = (props) => {
     }
   };
 
-  const onHandleChange = (event) => {
-    event.preventDefault();
+  const doValidate = (event) => {
     const { name, placeholder, value, type } = event.target;
     let errors = fields.errors;
     if (type === "select-multiple") {
@@ -55,28 +58,40 @@ const  useFormValidator = (props) => {
         event.target.selectedOptions,
         (option) => option.value
       );
-      validate(name, placeholder, optionValue, type, errors);
+      validate(name, 
+        (placeholder === undefined) ? (event.target.options[0].innerHTML) : placeholder, 
+        optionValue, 
+        type, 
+        errors
+      );
     } else validate(name, placeholder, value, type, errors);
+  }
+
+  const onHandleChange = (event) => {
+    doValidate(event);
   };
 
   const onHandleBlur = (event) => {
-    event.preventDefault();
-    const { name, placeholder, value, type } = event.target;
-    let errors = fields.errors;
-    validate(name, placeholder, value, type, errors);
+    doValidate(event);
   };
 
   const validate = (name, placeholder, value, type, errors) => {
     switch (type) {
       case "text":
       case "password":
-      case "checkbox":
+      case "textarea":
       case "select-one":
       case "select-multiple":
         errors[name] =
           value.length == 0 && props.errors.hasOwnProperty(name)
             ? `The ${placeholder ?? name} field is required`
             : "";
+        break;
+      case "checkbox":
+      case "radio":
+        errors[name] = (document.querySelector(`input[type=${type}]:checked`) === null)
+          ? `The ${placeholder ?? name} field is required`
+          : "";
         break;
       case "email":
         errors[name] =
@@ -105,8 +120,25 @@ const  useFormValidator = (props) => {
     Object.keys(fields).forEach((field) => {
       if (event.target[field] !== undefined) {
         event.target[field].value = "";
+
+        let checkboxElement = document.querySelectorAll("input[type='checkbox']");
+        if(checkboxElement.length > 0)
+        {
+          checkboxElement.forEach((element) => {
+            element.checked = false;
+          })
+        }
+
+        let radioElement = document.querySelectorAll("input[type='radio']");
+        if(radioElement.length > 0)
+        {
+          radioElement.forEach((element) => {
+            element.checked = false;
+          });
+        }
       }
     });
+    
     setFields({
       ...fields,
       ...resetFields,
